@@ -1,0 +1,3 @@
+[submodule "E2EFramework"]
+	path = E2EFramework
+	url = ../E2EFramework
