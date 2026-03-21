@@ -1,11 +1,11 @@
 #pragma once
 
 #include "E2EFramework/Driver.h"
+#include "Engine/Game.h"
 #include "GameModel.h"
 
 #include <memory>
 
-namespace Engine { class Game; }
 class GameScene;
 
 namespace MemoryGameTests
@@ -14,9 +14,7 @@ namespace MemoryGameTests
 class GameDriver : public E2EFramework::Driver
 {
 public:
-    enum class Mode { Headless, Headed };
-
-    explicit GameDriver(Mode mode = Mode::Headless,
+    explicit GameDriver(Engine::Game::Mode mode = Engine::Game::Mode::Headless,
                         GameModelConfig cfg = GameModelConfig{});
     ~GameDriver() override;
 
@@ -33,10 +31,6 @@ public:
     [[nodiscard]] const GameModel& model() const;
 
 private:
-    Mode mode_;
-
-    std::unique_ptr<GameModel> headlessModel_;
-
     std::unique_ptr<Engine::Game> game_;
     GameScene* scenePtr_{ nullptr };
 };

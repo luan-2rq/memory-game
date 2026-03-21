@@ -21,9 +21,9 @@ namespace When   = MemoryGameTests::Conditions;
 static Session makeSession(GameModelConfig cfg = GameModelConfig{})
 {
 #ifdef MEMORYGAME_HEADED_E2E
-    const MemoryGameTests::GameDriver::Mode driverMode = MemoryGameTests::GameDriver::Mode::Headed;
+    const Engine::Game::Mode driverMode = Engine::Game::Mode::Headed;
 #else
-    const MemoryGameTests::GameDriver::Mode driverMode = MemoryGameTests::GameDriver::Mode::Headless;
+    const Engine::Game::Mode driverMode = Engine::Game::Mode::Headless;
 #endif
     SessionConfig config;
     config.driverFactory = [driverMode, cfg]()
