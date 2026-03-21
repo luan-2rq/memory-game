@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Linux dependencies
         run: |
@@ -51,8 +53,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: memorygame-test-artifacts
+          if-no-files-found: ignore
           path: |
             Build/bin/
             Build/Testing/
             Build/Tests/*.cmake
             Build/Tests/*.json
+            Artifacts/e2e_failures/
