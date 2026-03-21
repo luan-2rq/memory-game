@@ -1,110 +1,12 @@
 #pragma once
 
+#include "Conditions/GameConditions.h"
 #include "E2EFramework/PageObject.h"
 
 #include <string>
 
 namespace MemoryGameTests
 {
-
-namespace Expect
-{
-
-inline E2EFramework::Interaction::Predicate CardIsFaceUp(int index)
-{
-    return [index](const GameDriver& d)
-    {
-        return d.model().cards()[index].isFaceUp();
-    };
-}
-
-inline E2EFramework::Interaction::Predicate StateIs(GameState expected)
-{
-    return [expected](const GameDriver& d)
-    {
-        return d.model().state() == expected;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate MatchedPairsEq(int count)
-{
-    return [count](const GameDriver& d)
-    {
-        return d.model().matchedPairs() == count;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate MatchedPairsAtLeast(int count)
-{
-    return [count](const GameDriver& d)
-    {
-        return d.model().matchedPairs() >= count;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate LevelIs(int level)
-{
-    return [level](const GameDriver& d)
-    {
-        return d.model().level() == level;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate GridSizeIs(int size)
-{
-    return [size](const GameDriver& d)
-    {
-        return d.model().gridSize() == size;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate MovesEq(int moves)
-{
-    return [moves](const GameDriver& d)
-    {
-        return d.model().moves() == moves;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate WindowOpen()
-{
-    return [](const GameDriver& d)
-    {
-        return d.isRunning();
-    };
-}
-
-}  // namespace Expect
-
-namespace When
-{
-
-inline E2EFramework::Interaction::Predicate GameIsPlaying()
-{
-    return [](const GameDriver& d)
-    {
-        return d.model().state() == GameState::Playing;
-    };
-}
-
-inline E2EFramework::Interaction::Predicate WindowIsOpen()
-{
-    return [](const GameDriver& d)
-    {
-        return d.isRunning();
-    };
-}
-
-inline E2EFramework::Interaction::Predicate CardIsFaceDown(int index)
-{
-    return [index](const GameDriver& d)
-    {
-        const auto& card = d.model().cards()[index];
-        return !card.isFaceUp() && !card.isMatched();
-    };
-}
-
-}  // namespace When
 
 class GameBoardPage : public E2EFramework::PageObject
 {
@@ -115,9 +17,9 @@ public:
     {
         const E2EFramework::ExecutionResult result = run(
             E2EFramework::Interaction::Click(index)
-                .When(When::GameIsPlaying())
+                .When(Conditions::GameIsPlaying())
                 .Do()
-                .ThenExpect(Expect::CardIsFaceUp(index),
+                .ThenExpect(Conditions::CardIsFaceUp(index),
                     "card " + std::to_string(index) + " to be face up"));
 
         lastResult_ = result;
@@ -128,9 +30,9 @@ public:
     {
         const E2EFramework::ExecutionResult result = run(
             E2EFramework::Interaction::Click(index)
-                .When(When::GameIsPlaying())
+                .When(Conditions::GameIsPlaying())
                 .Do()
-                .ThenExpect(Expect::MatchedPairsAtLeast(expectedMatchCount),
+                .ThenExpect(Conditions::MatchedPairsAtLeast(expectedMatchCount),
                     "pair to be matched"));
 
         lastResult_ = result;
@@ -142,7 +44,7 @@ public:
         const E2EFramework::ExecutionResult result = run(
             E2EFramework::Interaction::Restart()
                 .Do()
-                .ThenExpect(Expect::LevelIs(1),
+                .ThenExpect(Conditions::LevelIs(1),
                     "game to restart at level 1"));
 
         lastResult_ = result;
@@ -188,4 +90,4 @@ private:
     E2EFramework::ExecutionResult lastResult_;
 };
 
-}  // namespace MemoryGameTests
+}

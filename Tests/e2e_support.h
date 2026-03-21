@@ -1,6 +1,7 @@
 #pragma once
 
 #include "E2EFramework/Interaction.h"
+#include "Conditions/GameConditions.h"
 #include "PageObjects/GameBoardPage.h"
 
 #include <gtest/gtest.h>
@@ -11,8 +12,8 @@ using E2EFramework::ExecutionResult;
 using E2EFramework::Session;
 using E2EFramework::SessionConfig;
 using MemoryGameTests::GameBoardPage;
-namespace Expect = MemoryGameTests::Expect;
-namespace When   = MemoryGameTests::When;
+namespace Expect = MemoryGameTests::Conditions;
+namespace When   = MemoryGameTests::Conditions;
 
 static Session makeSession(GameModelConfig cfg = GameModelConfig{})
 {
