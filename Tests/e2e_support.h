@@ -1,33 +1,38 @@
 #pragma once
 
+#include "Drivers/GameDriver.h"
 #include "E2EFramework/Interaction.h"
 #include "Conditions/GameConditions.h"
 #include "PageObjects/GameBoardPage.h"
 
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <vector>
 
 using E2EFramework::ExecutionResult;
 using E2EFramework::Session;
 using E2EFramework::SessionConfig;
 using MemoryGameTests::GameBoardPage;
+namespace Conditions = MemoryGameTests::Conditions;
 namespace Expect = MemoryGameTests::Conditions;
 namespace When   = MemoryGameTests::Conditions;
 
 static Session makeSession(GameModelConfig cfg = GameModelConfig{})
 {
 #ifdef MEMORYGAME_HEADED_E2E
-    const GameDriver::Mode mode = GameDriver::Mode::Headed;
+    const MemoryGameTests::GameDriver::Mode driverMode = MemoryGameTests::GameDriver::Mode::Headed;
 #else
-    const GameDriver::Mode mode = GameDriver::Mode::Headless;
+    const MemoryGameTests::GameDriver::Mode driverMode = MemoryGameTests::GameDriver::Mode::Headless;
 #endif
     SessionConfig config;
-    config.mode = mode;
-    config.modelConfig = cfg;
+    config.driverFactory = [driverMode, cfg]()
+    {
+        return std::make_unique<MemoryGameTests::GameDriver>(driverMode, cfg);
+    };
     config.retryPolicy.timeoutSeconds = 3.f;
     config.retryPolicy.pollIntervalSeconds = 1.f / 120.f;
-    config.bootstrap = [](GameDriver& driver)
+    config.bootstrap = [](E2EFramework::Driver& driver)
     {
         driver.advance(0.016f);
     };
@@ -42,7 +47,7 @@ static void matchAllPairs(Session& session)
     std::vector<std::pair<int, int>> pairs;
     std::vector<bool> used(n, false);
 
-    const auto& cards = session.driver().model().cards();
+    const auto& cards = Conditions::asGameDriver(session.driver()).model().cards();
     for (int i = 0; i < n; ++i)
     {
         if (used[i]) continue;
@@ -64,6 +69,6 @@ static void matchAllPairs(Session& session)
         ASSERT_TRUE(board.lastResult().passed) << board.lastResult().message;
         board.clickMatchingCard(pair.second, expectedMatches);
         ASSERT_TRUE(board.lastResult().passed) << board.lastResult().message;
-        session.driver().settle();
+        Conditions::asGameDriver(session.driver()).settle();
     }
 }

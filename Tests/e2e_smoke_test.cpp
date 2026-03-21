@@ -2,7 +2,7 @@
 #include "e2e_support.h"
 
 // =============================================================================
-// Smoke — the absolute minimum that must pass before any other test runs.
+// Smoke — critical-path coverage for core game loop and mechanics.
 // Run with:  ./memorygame_e2e --category=Smoke
 // =============================================================================
 
@@ -29,7 +29,7 @@ E2E_TEST(Board, ClickingCardFlipsItFaceUp, Smoke)
     board.clickCard(0);
 
     ASSERT_TRUE(board.lastResult().passed) << board.lastResult().message;
-    EXPECT_TRUE(session.driver().model().cards()[0].isFaceUp());
+    EXPECT_TRUE(Conditions::asGameDriver(session.driver()).model().cards()[0].isFaceUp());
 }
 
 E2E_TEST(Board, RestartResetsGame, Smoke)

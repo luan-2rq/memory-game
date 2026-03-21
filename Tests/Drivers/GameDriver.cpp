@@ -1,10 +1,13 @@
-#include "E2EFramework/GameDriver.h"
+#include "Drivers/GameDriver.h"
 
 #include "Engine/Game.h"
 #include "GameConstants.h"
 #include "GameScene.h"
 
 #include <SFML/Graphics.hpp>
+
+namespace MemoryGameTests
+{
 
 static constexpr float kRestartCenterX = 300.f;
 static constexpr float kRestartCenterY = 597.f;
@@ -101,3 +104,5 @@ bool GameDriver::isRunning() const
 
     return game_->getWindow().isOpen();
 }
+
+}  // namespace MemoryGameTests

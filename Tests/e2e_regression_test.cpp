@@ -28,7 +28,7 @@ E2E_TEST(Board, MismatchedPairResolvesWithoutCounting, Regression)
     Session session = makeSession(cfg);
     GameBoardPage board(session);
 
-    const auto& cards = session.driver().model().cards();
+    const auto& cards = Conditions::asGameDriver(session.driver()).model().cards();
     int a = -1, b = -1;
     for (int i = 0; i < static_cast<int>(cards.size()) && b == -1; ++i)
         for (int j = i + 1; j < static_cast<int>(cards.size()) && b == -1; ++j)
@@ -39,9 +39,8 @@ E2E_TEST(Board, MismatchedPairResolvesWithoutCounting, Regression)
     ASSERT_TRUE(board.lastResult().passed) << board.lastResult().message;
 
     const ExecutionResult result = session.Run(
-        E2EFramework::Interaction::Click(b)
+        MemoryGameTests::ClickCard(b)
             .When(When::GameIsPlaying())
-            .Do()
             .ThenExpect(Expect::StateIs(GameState::Playing),
                 "mismatch to auto-resolve back to Playing"));
 

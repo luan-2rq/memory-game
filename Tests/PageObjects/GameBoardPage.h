@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Conditions/GameConditions.h"
+#include "GameInteractions.h"
 #include "E2EFramework/PageObject.h"
 
 #include <string>
@@ -16,9 +17,8 @@ public:
     GameBoardPage& clickCard(int index)
     {
         const E2EFramework::ExecutionResult result = run(
-            E2EFramework::Interaction::Click(index)
+            MemoryGameTests::ClickCard(index)
                 .When(Conditions::GameIsPlaying())
-                .Do()
                 .ThenExpect(Conditions::CardIsFaceUp(index),
                     "card " + std::to_string(index) + " to be face up"));
 
@@ -29,9 +29,8 @@ public:
     GameBoardPage& clickMatchingCard(int index, int expectedMatchCount)
     {
         const E2EFramework::ExecutionResult result = run(
-            E2EFramework::Interaction::Click(index)
+            MemoryGameTests::ClickCard(index)
                 .When(Conditions::GameIsPlaying())
-                .Do()
                 .ThenExpect(Conditions::MatchedPairsAtLeast(expectedMatchCount),
                     "pair to be matched"));
 
@@ -42,8 +41,7 @@ public:
     GameBoardPage& restart()
     {
         const E2EFramework::ExecutionResult result = run(
-            E2EFramework::Interaction::Restart()
-                .Do()
+            MemoryGameTests::RestartGame()
                 .ThenExpect(Conditions::LevelIs(1),
                     "game to restart at level 1"));
 
@@ -53,32 +51,32 @@ public:
 
     [[nodiscard]] bool isAtLevel(int level) const
     {
-        return driver().model().level() == level;
+        return Conditions::asGameDriver(driver()).model().level() == level;
     }
 
     [[nodiscard]] bool hasGridSize(int size) const
     {
-        return driver().model().gridSize() == size;
+        return Conditions::asGameDriver(driver()).model().gridSize() == size;
     }
 
     [[nodiscard]] bool isInState(GameState s) const
     {
-        return driver().model().state() == s;
+        return Conditions::asGameDriver(driver()).model().state() == s;
     }
 
     [[nodiscard]] int matchedPairs() const
     {
-        return driver().model().matchedPairs();
+        return Conditions::asGameDriver(driver()).model().matchedPairs();
     }
 
     [[nodiscard]] int moves() const
     {
-        return driver().model().moves();
+        return Conditions::asGameDriver(driver()).model().moves();
     }
 
     [[nodiscard]] int cardCount() const
     {
-        return static_cast<int>(driver().model().cards().size());
+        return static_cast<int>(Conditions::asGameDriver(driver()).model().cards().size());
     }
 
     [[nodiscard]] const E2EFramework::ExecutionResult& lastResult() const

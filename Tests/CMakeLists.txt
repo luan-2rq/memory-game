@@ -11,6 +11,7 @@ add_executable(memorygame_e2e
     e2e_main.cpp
     e2e_smoke_test.cpp
     e2e_regression_test.cpp
+    Drivers/GameDriver.cpp
 )
 
 target_include_directories(memorygame_e2e PRIVATE
@@ -22,6 +23,7 @@ target_include_directories(memorygame_e2e PRIVATE
 
 target_link_libraries(memorygame_e2e PRIVATE
     memorygame_e2e_framework
+    MemoryGameCore
     GTest::gtest
 )
 
