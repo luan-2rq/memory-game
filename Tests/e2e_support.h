@@ -1,0 +1,68 @@
+#pragma once
+
+#include "E2EFramework/Interaction.h"
+#include "PageObjects/GameBoardPage.h"
+
+#include <gtest/gtest.h>
+
+#include <vector>
+
+using E2EFramework::ExecutionResult;
+using E2EFramework::Session;
+using E2EFramework::SessionConfig;
+using MemoryGameTests::GameBoardPage;
+namespace Expect = MemoryGameTests::Expect;
+namespace When   = MemoryGameTests::When;
+
+static Session makeSession(GameModelConfig cfg = GameModelConfig{})
+{
+#ifdef MEMORYGAME_HEADED_E2E
+    const GameDriver::Mode mode = GameDriver::Mode::Headed;
+#else
+    const GameDriver::Mode mode = GameDriver::Mode::Headless;
+#endif
+    SessionConfig config;
+    config.mode = mode;
+    config.modelConfig = cfg;
+    config.retryPolicy.timeoutSeconds = 3.f;
+    config.retryPolicy.pollIntervalSeconds = 1.f / 120.f;
+    config.bootstrap = [](GameDriver& driver)
+    {
+        driver.advance(0.016f);
+    };
+    return Session(config);
+}
+
+static void matchAllPairs(Session& session)
+{
+    GameBoardPage board(session);
+    const int n = board.cardCount();
+
+    std::vector<std::pair<int, int>> pairs;
+    std::vector<bool> used(n, false);
+
+    const auto& cards = session.driver().model().cards();
+    for (int i = 0; i < n; ++i)
+    {
+        if (used[i]) continue;
+        for (int j = i + 1; j < n; ++j)
+        {
+            if (!used[j] && cards[j].getPairId() == cards[i].getPairId())
+            {
+                pairs.push_back({ i, j });
+                used[i] = used[j] = true;
+                break;
+            }
+        }
+    }
+
+    for (const auto& pair : pairs)
+    {
+        const int expectedMatches = board.matchedPairs() + 1;
+        board.clickCard(pair.first);
+        ASSERT_TRUE(board.lastResult().passed) << board.lastResult().message;
+        board.clickMatchingCard(pair.second, expectedMatches);
+        ASSERT_TRUE(board.lastResult().passed) << board.lastResult().message;
+        session.driver().settle();
+    }
+}
