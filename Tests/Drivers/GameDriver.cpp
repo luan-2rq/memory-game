@@ -71,4 +71,22 @@ bool GameDriver::isRunning() const
     return game_->isRunning();
 }
 
+bool GameDriver::saveScreenshot(const std::string& outputPath)
+{
+    if (!game_ || !game_->hasWindow())
+    {
+        return false;
+    }
+
+    sf::RenderWindow& window = game_->getWindow();
+    sf::Texture texture;
+    if (!texture.create(window.getSize().x, window.getSize().y))
+    {
+        return false;
+    }
+
+    texture.update(window);
+    return texture.copyToImage().saveToFile(outputPath);
+}
+
 }  // namespace MemoryGameTests

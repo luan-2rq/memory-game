@@ -27,6 +27,7 @@ public:
 
     void advance(float dt = 1.f / 60.f) override;
     [[nodiscard]] bool isRunning() const override;
+    bool saveScreenshot(const std::string& outputPath) override;
 
     [[nodiscard]] const GameModel& model() const;
 

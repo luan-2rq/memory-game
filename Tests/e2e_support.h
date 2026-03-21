@@ -32,6 +32,10 @@ static Session makeSession(GameModelConfig cfg = GameModelConfig{})
     };
     config.retryPolicy.timeoutSeconds = 3.f;
     config.retryPolicy.pollIntervalSeconds = 1.f / 120.f;
+#ifdef MEMORYGAME_HEADED_E2E
+    config.saveFailureScreenshotArtifact = true;
+    config.failureArtifactsDirectory = "Artifacts/e2e_failures";
+#endif
     config.bootstrap = [](E2EFramework::Driver& driver)
     {
         driver.advance(0.016f);
