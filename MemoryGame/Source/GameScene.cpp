@@ -1,16 +1,15 @@
 #include "GameScene.h"
 #include "Engine/Game.h"
+#include "GameConstants.h"
 
 #include <SFML/Graphics.hpp>
 
 #include <sstream>
 
-static constexpr float kWinWidth = 600.f;
-
 static constexpr float kBtnY   = 578.f;
 static constexpr float kBtnW   = 160.f;
 static constexpr float kBtnH   = 38.f;
-static constexpr float kBtnX   = (kWinWidth - kBtnW) / 2.f;
+static constexpr float kBtnX   = (MemoryGame::kWindowWidthF - kBtnW) / 2.f;
 
 const GameModel& GameScene::model() const { return model_; }
 
@@ -63,7 +62,7 @@ GameScene::GameScene(Engine::Game& game, GameModelConfig cfg)
         {
             const sf::FloatRect b = titleTxt_.getLocalBounds();
             titleTxt_.setOrigin(b.left + b.width / 2.f, b.top);
-            titleTxt_.setPosition(kWinWidth / 2.f, 10.f);
+            titleTxt_.setPosition(MemoryGame::kWindowWidthF / 2.f, 10.f);
         }
 
         setup(statusTxt_, 26);
@@ -115,7 +114,7 @@ void GameScene::update(float dt)
         levelTxt_.setString(oss.str());
         const sf::FloatRect b = levelTxt_.getLocalBounds();
         levelTxt_.setOrigin(b.left + b.width, b.top);
-        levelTxt_.setPosition(kWinWidth - 12.f, 10.f);
+        levelTxt_.setPosition(MemoryGame::kWindowWidthF - 12.f, 10.f);
     }
 
     if (model_.state() == GameState::Won)
@@ -128,7 +127,7 @@ void GameScene::update(float dt)
         statusTxt_.setString(oss.str());
         const sf::FloatRect b = statusTxt_.getLocalBounds();
         statusTxt_.setOrigin(b.left + b.width / 2.f, b.top);
-        statusTxt_.setPosition(kWinWidth / 2.f, kBtnY - 34.f);
+        statusTxt_.setPosition(MemoryGame::kWindowWidthF / 2.f, kBtnY - 34.f);
     }
     else
     {

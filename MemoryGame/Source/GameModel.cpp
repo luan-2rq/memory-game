@@ -1,4 +1,5 @@
 #include "GameModel.h"
+#include "GameConstants.h"
 
 #include <algorithm>
 #include <random>
@@ -8,7 +9,6 @@ static constexpr float kGap          = 10.f;
 static constexpr float kBoardTop     = 68.f;
 static constexpr float kBoardBottom  = 545.f;
 static constexpr float kBoardMargin  = 22.f;
-static constexpr float kWinWidth     = 600.f;
 
 GameModel::GameModel(Config cfg)
     : cfg_(cfg), gridSize_(cfg.initialGridSize)
@@ -104,13 +104,13 @@ void GameModel::initCards()
     for (int i = 0; i < pairCount_; ++i) { ids.push_back(i); ids.push_back(i); }
     std::shuffle(ids.begin(), ids.end(), std::mt19937{ std::random_device{}() });
 
-    const float boardWidth    = kWinWidth - 2.f * kBoardMargin;
+    const float boardWidth    = MemoryGame::kWindowWidthF - 2.f * kBoardMargin;
     const float boardHeight   = kBoardBottom - kBoardTop;
     const float cardW         = (boardWidth  - (gridSize_ - 1) * kGap) / static_cast<float>(gridSize_);
     const float cardH         = (boardHeight - (gridSize_ - 1) * kGap) / static_cast<float>(gridSize_);
     const float cardSize      = std::max(kMinCardSize, std::min(cardW, cardH));
     const float gridPixelSize = gridSize_ * cardSize + (gridSize_ - 1) * kGap;
-    const float gridLeft      = (kWinWidth - gridPixelSize) * 0.5f;
+    const float gridLeft      = (MemoryGame::kWindowWidthF - gridPixelSize) * 0.5f;
     const float gridTop       = kBoardTop + (boardHeight - gridPixelSize) * 0.5f;
 
     for (int row = 0; row < gridSize_; ++row)
