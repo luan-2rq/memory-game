@@ -1,338 +1,530 @@
 # MemoryGame
 
-A cross-platform memory matching game built with modern C++ and SFML, featuring a modular engine architecture, comprehensive automated testing, and an extensible end-to-end testing framework.
-
-## Overview
+A cross-platform memory matching game built with modern C++ and SFML. Features a modular engine architecture, comprehensive automated testing, and an extensible end-to-end testing framework.
 
 ![MemoryGame screenshot showing a 4x4 card grid with some cards flipped to reveal colored tiles with letter labels](MemoryGame/docs/screenshot.png)
 
-**Gameplay**: Players flip cards two at a time to find matching pairs on an expanding grid. Start with a 4x4 board (8 pairs) and advance through progressively larger levels (up to 8x8) as you complete each round.
+## ✨ Features
+
+- **Progressive Difficulty**: Start with 4x4 board, advance to 6x6 and 8x8 levels
+- **Smooth Animations**: Flip animations with color-coded card pairs  
+- **Modular Architecture**: Reusable Engine and E2E testing framework
+- **Cross-Platform**: Runs on macOS, Linux, and Windows
+- **Comprehensive Testing**: Unit tests + headless/headed end-to-end tests
+- **Extensible Design**: Easy to add new game modes, AI players, or UI themes
+
+## Table of Contents
+
+1. [Quick Start](#quick-start)
+2. [Requirements](#requirements)
+3. [Project Structure](#project-structure)
+4. [Building & Running](#building--running)
+5. [Gameplay Rules](#gameplay-rules)
+6. [Architecture](#architecture)
+   - [Engine Overview](#engine-overview)
+   - [Card & Animation System](#card-rendering-and-animation)
+   - [Game Model](#runtime-state-model)
+   - [Scene & UI](#scene-input-and-ui)
+7. [Testing](#testing)
+8. [Configuration & Tuning](#configuration--tuning)
+9. [Extending the Game](#extending-the-game)
+
+
 
 ## Quick Start
 
+### Prerequisites
+- C++17 compiler
+- CMake 3.16 or higher
+- SFML 2.5+ (auto-fetched if not found)
+- GoogleTest (auto-fetched for tests)
+
+### Build & Run
+
 ```bash
-# Configure and build
+# Clone and configure
+cd MemoryGame
+
+# Build with tests enabled
 cmake -S . -B Build -DMEMORYGAME_BUILD_TESTS=ON
 cmake --build Build
 
 # Run the game
 ./Build/bin/MemoryGame
 
-# Run tests
+# Run unit tests
 ctest --test-dir Build
 
 # Run E2E tests
 ./Build/bin/memorygame_e2e
 ```
 
-## Project Structure
-
-- **[MemoryGame/](MemoryGame)**: Game logic and UI (Card, GameModel, GameScene)
-- **[Engine/](Engine)**: Reusable runtime (Scene, Game loop, DelayedAction)
-- **[E2EFramework/](E2EFramework)**: App-agnostic end-to-end testing framework
-- **[Tests/](Tests)**: Unit and integration tests with game drivers
-
-## Table of Contents
-
-- [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [Module Details](#module-details)
-- [Engine Overview](#engine-overview)
-- [Game Rules & State](#gameplay-rules)
-- [Building & Running](#build-and-run)
-- [Testing](#testing)
-- [Extending the Game](#tuning-guide)
-
-## Module Details
-
-## What This Module Builds
-
-## Module Details
-
-### What This Module Builds
-
-- `MemoryGameCore` (library)
-  - Source files:
-    - [Source/Card.cpp](Source/Card.cpp)
-    - [Source/GameModel.cpp](Source/GameModel.cpp)
-    - [Source/GameScene.cpp](Source/GameScene.cpp)
-  - Public headers are under [Include](Include)
-  - Links against the shared `Engine` target
-
-- `MemoryGame` (executable)
-  - Entry point: [Source/main.cpp](Source/main.cpp)
-  - Links against `MemoryGameCore`
-
-## Folder Layout
-
-- [Include/Card.h](Include/Card.h): visual and interaction model for one card
-- [Include/GameModel.h](Include/GameModel.h): game rules and progression state
-- [Include/GameScene.h](Include/GameScene.h): scene/controller + UI wiring
-- [Include/GameConstants.h](Include/GameConstants.h): window constants
-- [Source](Source): implementations and entry point
-
-## Related Project Areas
-
-- **Engine**: [../Engine](../Engine) — Shared runtime and scene management
-- **E2EFramework**: [../E2EFramework](../E2EFramework) — Reusable testing framework
-- **Tests**: [../Tests](../Tests) — Game-specific test suite and drivers
-
 ## Requirements
 
-- C++17 compiler
-- CMake 3.16+
-- SFML 2.5+ (auto-fetched if not found)
-- GoogleTest (auto-fetched for tests)
+- **C++17** compiler support
+- **CMake** 3.16+
+- **SFML** 2.5+ (automatically fetched)
+- **GoogleTest** (automatically fetched for tests)
+- **macOS**: Helvetica or Arial font (for UI text)
 
-## Build & Run
-configure/build from the repository root.
+## Project Structure
+
+```
+MemoryGame/
+├── MemoryGame/              # Game logic and UI
+│   ├── Include/             # Card.h, GameModel.h, GameScene.h
+│   └── Source/              # Implementations + main.cpp
+├── Engine/                  # Reusable runtime library
+│   ├── Include/             # Game.h, Scene.h, DelayedAction.h
+│   └── Source/              # Engine implementation
+├── E2EFramework/            # App-agnostic E2E testing framework
+│   ├── Include/             # Driver.h, Interaction.h, Conditions.h
+│   └── src/                 # Framework implementation
+├── Tests/                   # Game-specific tests
+│   ├── e2e_main.cpp         # E2E test entry point
+│   ├── e2e_smoke_test.cpp   # Quick smoke tests
+│   ├── e2e_regression_test.cpp  # Comprehensive tests
+│   ├── PageObjects/         # Test page objects
+│   ├── Drivers/             # Game-specific drivers
+│   └── Tools/               # Test utilities (GIF generation, etc.)
+├── CMakeLists.txt           # Root build config
+└── README.md                # This file
+```
+
+**Module Responsibilities:**
+
+| Module | Purpose | Key Components |
+|--------|---------|-----------------|
+| **MemoryGame** | Game logic and UI | Card, GameModel, GameScene |
+| **Engine** | Reusable runtime | Game loop, window management, Scene interface |
+| **E2EFramework** | Testing framework | Driver orchestration, Interaction patterns, Conditions |
+| **Tests** | Automated testing | Unit tests, E2E tests, Test drivers |
+
+---
+
+## Building & Running
+
+### Basic Build
 
 ```bash
-cmake -S . -B Build -DMEMORYGAME_BUILD_TESTS=ON
+cmake -S . -B Build
 cmake --build Build --target MemoryGame
 ./Build/bin/MemoryGame
 ```
 
-Notes:
+### Build Options
 
-- The root CMake setup finds SFML locally or fetches SFML 2.6.2 automatically.
-- On macOS, the executable is configured as a regular binary (not an app bundle).
-- Debug builds use `-DCMAKE_BUILD_TYPE=Debug`; Release builds use `-DCMAKE_BUILD_TYPE=Release`
+| Option | Description | Example |
+|--------|-------------|---------|
+| `DMEMORYGAME_BUILD_TESTS` | Include unit tests | `-DMEMORYGAME_BUILD_TESTS=ON` |
+| `DMEMORYGAME_HEADED_E2E` | Run E2E tests with display | `-DMEMORYGAME_HEADED_E2E=ON` |
+| `DCMAKE_BUILD_TYPE` | Build configuration | `-DCMAKE_BUILD_TYPE=Release` |
 
-## Testing
-
-### Unit Tests
+### Build Targets
 
 ```bash
-# Build and run all tests
+# Build everything
+cmake --build Build
+
+# Build only the game
+cmake --build Build --target MemoryGame
+
+# Build only tests
 cmake --build Build --target memorygame_tests
-ctest --test-dir Build --verbose
-```
 
-### End-to-End Tests
-
-```bash
-# Headless (default, no window required)
-./Build/bin/memorygame_e2e
-
-# Headed (requires display)
-cmake -B Build -DMEMORYGAME_HEADED_E2E=ON
+# Build E2E tests
 cmake --build Build --target memorygame_e2e
-./Build/bin/memorygame_e2e
-
-# Run specific category
-./Build/bin/memorygame_e2e --category=Smoke
-
-# Repeat tests for flakiness detection
-MEMORYGAME_E2E_REPEAT=10 ./Build/bin/memorygame_e2e
-
-# Generate animated GIF with logs overlay
-./Tests/Tools/run_e2e_gif.sh
 ```
 
-For more details, see [E2EFramework/README.md](E2EFramework/README.md).
-
-## Extending the Game
-
-## Engine Overview
-
-`MemoryGame` runs on the shared Engine module in [../Engine](../Engine).
-
-Key Engine types used by this module:
-
-- [../Engine/Include/Engine/Game.h](../Engine/Include/Engine/Game.h)
-- [../Engine/Include/Engine/Scene.h](../Engine/Include/Engine/Scene.h)
-- [../Engine/Include/Engine/DelayedAction.h](../Engine/Include/Engine/DelayedAction.h)
-
-### Engine::Game
-
-[../Engine/Include/Engine/Game.h](../Engine/Include/Engine/Game.h) defines the
-runtime host:
-
-- Creates and owns the SFML window in `Headed` mode.
-- Can run in `Headless` mode (no window) for automated scenarios.
-- Owns current and pending scenes and applies scene transitions safely.
-- Exposes `run(startScene)` for real-time loop execution.
-- Exposes `step(dt)` for deterministic, externally driven progression.
-- Exposes `quit()`, `isRunning()`, `hasWindow()`, and `getWindow()`.
-
-Loop behavior in [../Engine/Source/Engine/Game.cpp](../Engine/Source/Engine/Game.cpp):
-
-1. Poll events and forward to current scene.
-2. Apply pending scene transition.
-3. Update current scene.
-4. Apply pending scene transition again (if requested during update).
-5. Draw current scene, optionally capture frame artifacts, then display.
-
-### Engine::Scene
-
-[../Engine/Include/Engine/Scene.h](../Engine/Include/Engine/Scene.h) defines a
-minimal scene interface with virtual hooks:
-
-- `handleEvent(const sf::Event&)`
-- `update(float dt)`
-- `draw(sf::RenderWindow&)`
-
-`GameScene` in this module derives from `Engine::Scene` and implements all
-three hooks.
-
-### Engine::DelayedAction
-
-[../Engine/Include/Engine/DelayedAction.h](../Engine/Include/Engine/DelayedAction.h)
-is a small one-shot timer utility:
-
-- `start(duration, callback)` schedules a callback
-- `update(dt, canAdvance)` progresses time and fires callback when elapsed
-- `cancel()` aborts pending action
-
-`GameModel` uses two delayed actions:
-
-- mismatch reveal delay before flipping unmatched cards down
-- win delay before automatically advancing to the next level
-
-### Frame Capture Support
-
-In headed mode, the Engine can save per-frame PNGs when
-`MEMORYGAME_CAPTURE_FRAMES_DIR` is set in the environment.
-
-Implementation is in
-[../Engine/Source/Engine/Game.cpp](../Engine/Source/Engine/Game.cpp) via
-`captureFrameIfRequested()`.
+---
 
 ## Gameplay Rules
 
-Rules are implemented in [Source/GameModel.cpp](Source/GameModel.cpp).
+The game involves finding matching pairs on an expanding grid. Rules are implemented in [MemoryGame/Source/GameModel.cpp](MemoryGame/Source/GameModel.cpp).
 
-1. The board starts at 4x4 (8 pairs).
-2. Players flip two cards at a time.
-3. If both cards match:
-   - both become permanently matched
-   - `matchedPairs` increases
-4. If cards do not match:
-   - state switches to `ShowingMismatch`
-   - after `mismatchDelay` (default `0.9s`) both cards flip back down
-5. Completing all pairs triggers `Won`.
-6. After `winDelay` (default `1.2s`), level advances automatically.
-7. Grid grows by +2 per side each level (4x4 -> 6x6 -> 8x8), capped by
-   `maxGridSize`.
-8. `moves` counts each completed 2-card attempt.
+1. **Board Setup**: Game starts at 4x4 grid (8 pairs of cards)
+2. **Flipping**: Players flip two cards at a time to find matches
+3. **Match Found**: Both cards stay face-up and become permanently matched
+4. **Mismatch**: After 0.9 seconds, unmatched cards flip back down
+5. **Level Complete**: When all pairs are matched, level is won
+6. **Progression**: After 1.2 seconds, the game automatically advances to next level
+7. **Grid Growth**: Each level increases grid size by 2 per side (4x4 → 6x6 → 8x8, max 8x8)
+8. **Moves Tracked**: Each completed 2-card attempt counts as one move
 
-## Runtime State Model
+**Game States:**
+- `Playing`: Normal gameplay mode
+- `ShowingMismatch`: Cards being shown after mismatch before flipping back
+- `Won`: Level completed, ready to advance
 
-[Include/GameModel.h](Include/GameModel.h) exposes:
+---
 
-- `GameState`:
-  - `Playing`
-  - `ShowingMismatch`
-  - `Won`
-- `GameModelConfig`:
-  - `initialGridSize` (default `4`)
-  - `maxGridSize` (default `8`)
-  - `mismatchDelay` (default `0.9f`)
-  - `winDelay` (default `1.2f`)
+## Architecture
 
-Core API:
+### Module Details
 
-- `tryFlip(index)`: attempts to flip a card (returns `false` if invalid)
-- `update(dt)`: advances animations and delayed actions
-- `reset()`: resets to level 1 and initial grid
-- read accessors for cards, moves, level, grid size, matched pairs, state
+#### MemoryGame Core
 
-## Card Rendering And Animation
+The game module creates two build targets:
 
-Implemented in [Source/Card.cpp](Source/Card.cpp):
+- **MemoryGameCore** (library)
+  - Compiled from [MemoryGame/Source/Card.cpp](MemoryGame/Source/Card.cpp), [MemoryGame/Source/GameModel.cpp](MemoryGame/Source/GameModel.cpp), [MemoryGame/Source/GameScene.cpp](MemoryGame/Source/GameScene.cpp)
+  - Public headers in [MemoryGame/Include/](MemoryGame/Include/)
+  - Links against shared `Engine` target
 
-- Flip animation uses an interpolated parameter `flipT` and cosine-based width
-  scaling.
-- Card front color is derived from pair id using HSV -> RGB conversion.
-- Matched cards are brightened.
-- Face labels use an alphanumeric symbol set (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`)
-  to avoid ambiguous characters.
+- **MemoryGame** (executable)
+  - Entry point: [MemoryGame/Source/main.cpp](MemoryGame/Source/main.cpp)
+  - Window size: 600x630 (defined in [MemoryGame/Include/GameConstants.h](MemoryGame/Include/GameConstants.h))
+  - Links against `MemoryGameCore`
 
-Public behavior is defined in [Include/Card.h](Include/Card.h):
+### Engine Overview
 
-- `flipUp()`, `flipDown()`
-- `setMatched(bool)`
-- `contains(point)` and `getBounds()` for hit testing
-- `update(dt)` and `draw(window, font)`
+The game runs on the shared **Engine** module. See [Engine/README.md](Engine/README.md) for details.
 
-## Scene, Input, And UI
+**Key Engine Components:**
 
-Implemented in [Source/GameScene.cpp](Source/GameScene.cpp) and declared in
-[Include/GameScene.h](Include/GameScene.h).
+#### Engine::Game
 
-Responsibilities:
+[Engine/Include/Engine/Game.h](Engine/Include/Engine/Game.h) — The runtime host:
 
-- Handles left mouse clicks.
-- Restarts game when restart button is clicked.
-- Delegates card clicks to `GameModel::tryFlip`.
-- Updates HUD text:
-  - moves
-  - level + current grid size
-  - win/level-complete status message
-- Draws board, title, stats, restart button, and status.
+- Creates and manages SFML window (or runs headless)
+- Owns scene graph and manages scene transitions
+- Provides two execution modes:
+  - `run(startScene)`: Real-time loop
+  - `step(dt)`: Deterministic, frame-by-frame progression
+- Exposes: `quit()`, `isRunning()`, `hasWindow()`, `getWindow()`
 
-Font loading behavior:
+**Game Loop (Main ~150):**
+1. Poll events and forward to current scene
+2. Apply pending scene transition
+3. Update current scene with delta time
+4. Apply pending scene transition again (if requested)
+5. Draw scene and display (optionally capture frame)
 
-- Attempts common macOS font paths:
-  - `/System/Library/Fonts/Supplemental/Arial.ttf`
-  - `/System/Library/Fonts/Helvetica.ttc`
-- If no font is available, gameplay still runs but text UI is skipped.
+#### Engine::Scene
 
-## Entry Point
+[Engine/Include/Engine/Scene.h](Engine/Include/Engine/Scene.h) — Base scene interface:
 
-[Source/main.cpp](Source/main.cpp) creates and runs the engine game loop:
+```cpp
+class Scene {
+    virtual void handleEvent(const sf::Event&);
+    virtual void update(float dt);
+    virtual void draw(sf::RenderWindow&);
+};
+```
 
-- title: `Memory Game`
-- size from [Include/GameConstants.h](Include/GameConstants.h): `600x630`
-- initial scene: `GameScene`
+`GameScene` (this module) derives from `Engine::Scene` and implements all three hooks.
 
-## Extending the Game
+#### Engine::DelayedAction
 
-### Custom Difficulty
+[Engine/Include/Engine/DelayedAction.h](Engine/Include/Engine/DelayedAction.h) — One-shot timer utility:
 
-Modify `GameModelConfig` to change difficulty and pacing:
+- `start(duration, callback)`: Schedule a callback
+- `update(dt, canAdvance)`: Progress time, fire callback when elapsed
+- `cancel()`: Abort pending action
+
+Used by `GameModel` for:
+- Mismatch reveal delay (flip mismatched cards down)
+- Win delay (auto-advance to next level)
+
+#### Frame Capture Support
+
+In headed mode, SFML window can save per-frame PNG images when `MEMORYGAME_CAPTURE_FRAMES_DIR` environment variable is set.
+
+Implementation: [Engine/Source/Engine/Game.cpp](Engine/Source/Engine/Game.cpp#L150) → `captureFrameIfRequested()`
+
+### Runtime State Model
+
+[MemoryGame/Include/GameModel.h](MemoryGame/Include/GameModel.h) manages game rules and progression.
+
+**GameModelConfig:**
+```cpp
+struct GameModelConfig {
+    int initialGridSize = 4;      // Starting board size
+    int maxGridSize = 8;           // Maximum board size  
+    float mismatchDelay = 0.9f;   // Seconds before flipping Down mismatches
+    float winDelay = 1.2f;         // Seconds before advancing level
+};
+```
+
+**Core API:**
+- `bool tryFlip(int cardIndex)`: Attempt to flip a card
+- `void update(float dt)`: Advance animations and timers
+- `void reset()`: Reset to level 1
+- Accessors: `getCards()`, `getMoves()`, `getLevel()`, `getGridSize()`, `getMatchedPairs()`, `getState()`
+
+**Input Constraints:**
+`tryFlip` rejects input when:
+- Game state is not `Playing`
+- Card is already matched
+- Card is already face-up
+- Card is currently animating
+- Card index is one of the two active selections
+
+This keeps gameplay deterministic and prevents race conditions.
+
+### Card Rendering and Animation
+
+[MemoryGame/Source/Card.cpp](MemoryGame/Source/Card.cpp) — Implements card visuals and animations.
+
+**Animation System:**
+- Flip animation uses interpolated parameter `flipT` with cosine-based width scaling
+- Smooth transition from face-down to face-up
+- Color derived from pair ID using HSV → RGB conversion
+- Matched cards appear brightened
+
+**Card Features:**
+- `flipUp()` / `flipDown()`: Change face direction
+- `setMatched(bool)`: Mark pair as matched
+- `contains(point)` / `getBounds()`: Hit testing
+- `update(dt)` / `draw(window, font)`: Animation and rendering
+
+**Face Labels:**
+Uses alphanumeric symbol set: `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (avoids ambiguous characters like I, O)
+
+### Scene, Input, and UI
+
+[MemoryGame/Source/GameScene.cpp](MemoryGame/Source/GameScene.cpp) — Scene controller and UI rendering.
+
+**Responsibilities:**
+- Handle left mouse clicks and forward to `GameModel::tryFlip`
+- Manage restart button interactions
+- Update HUD text (moves, level, grid size, status)
+- Render board, title, stats, buttons, and messages
+
+**Font Loading:**
+Attempts common macOS font paths:
+- `/System/Library/Fonts/Supplemental/Arial.ttf`
+- `/System/Library/Fonts/Helvetica.ttc`
+
+If no font is found, gameplay continues but UI text is skipped.
+
+---
+
+## Testing
+
+The project includes comprehensive automated testing at multiple levels.
+
+### Unit & Integration Tests
+
+```bash
+# Build tests
+cmake --build Build --target memorygame_tests
+
+# Run with verbose output
+ctest --test-dir Build --verbose
+
+# Run specific test
+ctest --test-dir Build --verbose --tests-regex CardTest
+```
+
+### End-to-End (E2E) Tests
+
+E2E tests verify the entire game flow and UI interactions. See [E2EFramework/README.md](E2EFramework/README.md) for framework details.
+
+**Headless Mode** (no window required, fast CI/CD):
+```bash
+cmake --build Build --target memorygame_e2e
+./Build/bin/memorygame_e2e
+```
+
+**Headed Mode** (requires display, visual verification):
+```bash
+cmake -B Build -DMEMORYGAME_HEADED_E2E=ON
+cmake --build Build --target memorygame_e2e
+./Build/bin/memorygame_e2e
+```
+
+**Test Categories:**
+```bash
+# Run only smoke tests (quick sanity checks)
+./Build/bin/memorygame_e2e --category=Smoke
+
+# Run regression tests (comprehensive)
+./Build/bin/memorygame_e2e --category=Regression
+```
+
+**Flakiness Detection:**
+```bash
+# Repeat tests 10 times to detect flakiness
+MEMORYGAME_E2E_REPEAT=10 ./Build/bin/memorygame_e2e
+```
+
+**GIF Generation with Logs:**
+```bash
+# Generate animated GIF showing test execution with overlay logs
+./Tests/Tools/run_e2e_gif.sh
+# Output: Artifacts/e2e_gif/
+```
+
+---
+
+## Configuration & Tuning
+
+### Difficulty & Pacing
+
+Modify `GameModelConfig` to customize gameplay difficulty and pacing:
 
 ```cpp
 GameModelConfig cfg;
-cfg.initialGridSize = 2;    // Start smaller
-cfg.maxGridSize = 6;         // Stop earlier
-cfg.mismatchDelay = 0.5f;   // Flip back faster
-cfg.winDelay = 0.8f;        // Advance sooner
+cfg.initialGridSize = 2;     // Start with 2x2 instead of 4x4
+cfg.maxGridSize = 6;          // Cap at 6x6 instead of 8x8
+cfg.mismatchDelay = 0.5f;    // Flip back faster (0.5s vs 0.9s)
+cfg.winDelay = 0.8f;          // Advance to next level sooner
 
 GameScene app(game, cfg);
 ```
 
-### Adding New Features
+**Common Tuning Options:**
 
-1. **New Card Types**: Extend `Card` class for special behaviors
-2. **New Game Modes**: Create new `GameScene` derivatives
-3. **UI Customization**: Override `GameScene::draw()` and `handleEvent()`
-4. **AI Player**: Implement using the E2E framework driver pattern
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `initialGridSize` | 4 | Starting board size (4x4) |
+| `maxGridSize` | 8 | Maximum board size (8x8) |
+| `mismatchDelay` | 0.9s | Time before mismatched cards flip back |
+| `winDelay` | 1.2s | Time before advancing to next level |
 
-## Tuning Guide
+### Default Configuration Location
 
-## Tuning Guide
+Defaults can be changed in:
+- Runtime: Pass custom `GameModelConfig` to `GameScene` constructor
+- Code: Modify defaults in [MemoryGame/Include/GameModel.h](MemoryGame/Include/GameModel.h)
 
-You can tune difficulty and pacing by changing `GameModelConfig` defaults in
-[Include/GameModel.h](Include/GameModel.h) or by passing custom config to
-`GameScene`.
+### Framerate & Performance
 
-Common tweaks:
+**Frame Capture (for benchmarking):**
+```bash
+# Save every frame as PNG (with timestamps and logs overlay)
+MEMORYGAME_CAPTURE_FRAMES_DIR=./frames ./Build/bin/MemoryGame
+```
 
-- Faster rounds: reduce `mismatchDelay` and `winDelay`
-- Longer progression: increase `maxGridSize`
-- Different opening difficulty: change `initialGridSize`
+**Debug vs Release Build:**
+```bash
+# Debug (slower, verbose logging)
+cmake -B Build -DCMAKE_BUILD_TYPE=Debug
 
-## Interaction Constraints
+# Release (optimized, faster)
+cmake -B Build -DCMAKE_BUILD_TYPE=Release
+```
 
-`tryFlip` intentionally rejects input when:
+---
 
-- game state is not `Playing`
-- selected card is already matched
-- selected card is already face up
-- selected card is animating
-- selected index is already one of the active selections
+## Extending the Game
 
-This keeps gameplay deterministic and avoids race conditions during animations
-and delayed callbacks.
+The modular architecture makes it easy to extend functionality.
+
+### Adding Custom Difficulty Modes
+
+```cpp
+// Create a new game mode with different progression
+class HardMode : public GameScene {
+    GameModelConfig createHardConfig() {
+        GameModelConfig cfg;
+        cfg.initialGridSize = 6;    // Start harder
+        cfg.mismatchDelay = 0.3f;   // Less time to memorize
+        cfg.winDelay = 0.5f;         // Faster progression
+        return cfg;
+    }
+};
+```
+
+### Adding New Card Types
+
+Extend the `Card` class to add special behaviors:
+
+```cpp
+class BonusCard : public Card {
+public:
+    BonusCard() : Card() {}
+    
+    void update(float dt) override {
+        Card::update(dt);
+        // Add special animation or effect
+    }
+};
+```
+
+### Creating New Game Modes
+
+Derive from `Engine::Scene` to create alternative game modes:
+
+```cpp
+class TimeAttackScene : public Engine::Scene {
+    void handleEvent(const sf::Event& event) override;
+    void update(float dt) override;
+    void draw(sf::RenderWindow& window) override;
+};
+
+// Launch from main.cpp
+```
+
+### Implementing AI Player
+
+Use the E2E framework's driver pattern to build an AI that plays the game:
+
+```cpp
+class AIDriver : public E2EFramework::Driver {
+    void initialize() override;
+    void advance(float dt) override;
+    
+    bool playOptimalMove() {
+        // Implement game-solving algorithm
+    }
+};
+```
+
+See [E2EFramework/README.md](E2EFramework/README.md) for framework details.
+
+### Custom UI & Themes
+
+Override `GameScene::draw()` to customize appearance:
+
+```cpp
+class CustomThemeScene : public GameScene {
+    void draw(sf::RenderWindow& window) override {
+        // Custom rendering: different colors, fonts, layouts
+        drawCustomBackground();
+        drawCustomCards();
+    }
+};
+```
+
+---
+
+## Project Guidelines
+
+### Code Organization
+
+- **Headers**: Public interfaces in `Include/` directories
+- **Sources**: Implementations in `Source/` directories  
+- **Tests**: Test code in `Tests/` directory with app-specific drivers in `Drivers/`
+- **Framework**: Reusable code in `Engine/` and `E2EFramework/`
+
+### Adding Dependencies
+
+Dependencies are managed through CMake and automatically fetched:
+- **SFML**: Fetched from GitHub if not found locally
+- **GoogleTest**: Fetched for test builds
+
+To add a new dependency, update the relevant `CMakeLists.txt`.
+
+### Testing New Features
+
+1. Write unit tests in `Tests/` directory
+2. Add E2E test in `Tests/e2e_*.cpp`
+3. Create page objects in `Tests/PageObjects/` if needed
+4. Add  custom driver methods in `Tests/Drivers/` as needed
+5. Run full test suite: `ctest --test-dir Build --verbose`
+
+---
+
+## License
+
+See [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please ensure:
+- All tests pass locally before submitting
+- New features include corresponding unit/E2E tests
+- Code follows project conventions (C++17, modern practices)
+- README is updated if adding major features
