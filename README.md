@@ -1,6 +1,6 @@
 # MemoryGame
 
-A cross-platform memory matching game built with modern C++ and SFML. Features a modular engine architecture, comprehensive automated testing, and an extensible end-to-end testing framework.
+A memory matching game built with modern C++ and SFML. Features a modular engine architecture, comprehensive automated testing, and an extensible end-to-end testing framework.
 
 ![MemoryGame screenshot showing a 4x4 card grid with some cards flipped to reveal colored tiles with letter labels](MemoryGame/docs/screenshot.png)
 
