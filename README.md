@@ -520,11 +520,3 @@ To add a new dependency, update the relevant `CMakeLists.txt`.
 ## License
 
 See [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please ensure:
-- All tests pass locally before submitting
-- New features include corresponding unit/E2E tests
-- Code follows project conventions (C++17, modern practices)
-- README is updated if adding major features
