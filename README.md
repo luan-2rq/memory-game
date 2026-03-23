@@ -5,7 +5,7 @@ library.
 
 ## Gameplay Overview
 
-![MemoryGame screenshot showing a 4x4 card grid with some cards flipped to reveal colored tiles with letter labels](docs/screenshot.png)
+![MemoryGame screenshot showing a 4x4 card grid with some cards flipped to reveal colored tiles with letter labels](MemoryGame/docs/screenshot.png)
 
 The game challenges players to find matching pairs on an expanding grid. Start with a 4x4
 board and advance through progressively larger levels (up to 8x8) as you complete each
