@@ -1,19 +1,55 @@
-# MemoryGame Module
+# MemoryGame
 
-This folder contains the playable Memory Game application and its core gameplay
-library.
+A cross-platform memory matching game built with modern C++ and SFML, featuring a modular engine architecture, comprehensive automated testing, and an extensible end-to-end testing framework.
 
-## Gameplay Overview
+## Overview
 
 ![MemoryGame screenshot showing a 4x4 card grid with some cards flipped to reveal colored tiles with letter labels](MemoryGame/docs/screenshot.png)
 
-The game challenges players to find matching pairs on an expanding grid. Start with a 4x4
-board and advance through progressively larger levels (up to 8x8) as you complete each
-round.
+**Gameplay**: Players flip cards two at a time to find matching pairs on an expanding grid. Start with a 4x4 board (8 pairs) and advance through progressively larger levels (up to 8x8) as you complete each round.
+
+## Quick Start
+
+```bash
+# Configure and build
+cmake -S . -B Build -DMEMORYGAME_BUILD_TESTS=ON
+cmake --build Build
+
+# Run the game
+./Build/bin/MemoryGame
+
+# Run tests
+ctest --test-dir Build
+
+# Run E2E tests
+./Build/bin/memorygame_e2e
+```
+
+## Project Structure
+
+- **[MemoryGame/](MemoryGame)**: Game logic and UI (Card, GameModel, GameScene)
+- **[Engine/](Engine)**: Reusable runtime (Scene, Game loop, DelayedAction)
+- **[E2EFramework/](E2EFramework)**: App-agnostic end-to-end testing framework
+- **[Tests/](Tests)**: Unit and integration tests with game drivers
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Module Details](#module-details)
+- [Engine Overview](#engine-overview)
+- [Game Rules & State](#gameplay-rules)
+- [Building & Running](#build-and-run)
+- [Testing](#testing)
+- [Extending the Game](#tuning-guide)
+
+## Module Details
 
 ## What This Module Builds
 
-Defined in [CMakeLists.txt](CMakeLists.txt):
+## Module Details
+
+### What This Module Builds
 
 - `MemoryGameCore` (library)
   - Source files:
@@ -35,9 +71,20 @@ Defined in [CMakeLists.txt](CMakeLists.txt):
 - [Include/GameConstants.h](Include/GameConstants.h): window constants
 - [Source](Source): implementations and entry point
 
-## Build And Run
+## Related Project Areas
 
-This module depends on targets created by the repository root CMake project, so
+- **Engine**: [../Engine](../Engine) — Shared runtime and scene management
+- **E2EFramework**: [../E2EFramework](../E2EFramework) — Reusable testing framework
+- **Tests**: [../Tests](../Tests) — Game-specific test suite and drivers
+
+## Requirements
+
+- C++17 compiler
+- CMake 3.16+
+- SFML 2.5+ (auto-fetched if not found)
+- GoogleTest (auto-fetched for tests)
+
+## Build & Run
 configure/build from the repository root.
 
 ```bash
@@ -49,8 +96,43 @@ cmake --build Build --target MemoryGame
 Notes:
 
 - The root CMake setup finds SFML locally or fetches SFML 2.6.2 automatically.
-- On macOS, the executable is configured as a regular binary (not an app
-  bundle).
+- On macOS, the executable is configured as a regular binary (not an app bundle).
+- Debug builds use `-DCMAKE_BUILD_TYPE=Debug`; Release builds use `-DCMAKE_BUILD_TYPE=Release`
+
+## Testing
+
+### Unit Tests
+
+```bash
+# Build and run all tests
+cmake --build Build --target memorygame_tests
+ctest --test-dir Build --verbose
+```
+
+### End-to-End Tests
+
+```bash
+# Headless (default, no window required)
+./Build/bin/memorygame_e2e
+
+# Headed (requires display)
+cmake -B Build -DMEMORYGAME_HEADED_E2E=ON
+cmake --build Build --target memorygame_e2e
+./Build/bin/memorygame_e2e
+
+# Run specific category
+./Build/bin/memorygame_e2e --category=Smoke
+
+# Repeat tests for flakiness detection
+MEMORYGAME_E2E_REPEAT=10 ./Build/bin/memorygame_e2e
+
+# Generate animated GIF with logs overlay
+./Tests/Tools/run_e2e_gif.sh
+```
+
+For more details, see [E2EFramework/README.md](E2EFramework/README.md).
+
+## Extending the Game
 
 ## Engine Overview
 
@@ -205,6 +287,31 @@ Font loading behavior:
 - size from [Include/GameConstants.h](Include/GameConstants.h): `600x630`
 - initial scene: `GameScene`
 
+## Extending the Game
+
+### Custom Difficulty
+
+Modify `GameModelConfig` to change difficulty and pacing:
+
+```cpp
+GameModelConfig cfg;
+cfg.initialGridSize = 2;    // Start smaller
+cfg.maxGridSize = 6;         // Stop earlier
+cfg.mismatchDelay = 0.5f;   // Flip back faster
+cfg.winDelay = 0.8f;        // Advance sooner
+
+GameScene app(game, cfg);
+```
+
+### Adding New Features
+
+1. **New Card Types**: Extend `Card` class for special behaviors
+2. **New Game Modes**: Create new `GameScene` derivatives
+3. **UI Customization**: Override `GameScene::draw()` and `handleEvent()`
+4. **AI Player**: Implement using the E2E framework driver pattern
+
+## Tuning Guide
+
 ## Tuning Guide
 
 You can tune difficulty and pacing by changing `GameModelConfig` defaults in
@@ -229,9 +336,3 @@ Common tweaks:
 
 This keeps gameplay deterministic and avoids race conditions during animations
 and delayed callbacks.
-
-## Related Project Areas
-
-- Engine runtime: [../Engine](../Engine)
-- End-to-end framework: [../E2EFramework](../E2EFramework)
-- Automated tests: [../Tests](../Tests)
