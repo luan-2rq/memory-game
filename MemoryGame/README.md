@@ -3,6 +3,14 @@
 This folder contains the playable Memory Game application and its core gameplay
 library.
 
+## Gameplay Overview
+
+![MemoryGame screenshot showing a 4x4 card grid with some cards flipped to reveal colored tiles with letter labels](docs/screenshot.png)
+
+The game challenges players to find matching pairs on an expanding grid. Start with a 4x4
+board and advance through progressively larger levels (up to 8x8) as you complete each
+round.
+
 ## What This Module Builds
 
 Defined in [CMakeLists.txt](CMakeLists.txt):
@@ -43,6 +51,71 @@ Notes:
 - The root CMake setup finds SFML locally or fetches SFML 2.6.2 automatically.
 - On macOS, the executable is configured as a regular binary (not an app
   bundle).
+
+## Engine Overview
+
+`MemoryGame` runs on the shared Engine module in [../Engine](../Engine).
+
+Key Engine types used by this module:
+
+- [../Engine/Include/Engine/Game.h](../Engine/Include/Engine/Game.h)
+- [../Engine/Include/Engine/Scene.h](../Engine/Include/Engine/Scene.h)
+- [../Engine/Include/Engine/DelayedAction.h](../Engine/Include/Engine/DelayedAction.h)
+
+### Engine::Game
+
+[../Engine/Include/Engine/Game.h](../Engine/Include/Engine/Game.h) defines the
+runtime host:
+
+- Creates and owns the SFML window in `Headed` mode.
+- Can run in `Headless` mode (no window) for automated scenarios.
+- Owns current and pending scenes and applies scene transitions safely.
+- Exposes `run(startScene)` for real-time loop execution.
+- Exposes `step(dt)` for deterministic, externally driven progression.
+- Exposes `quit()`, `isRunning()`, `hasWindow()`, and `getWindow()`.
+
+Loop behavior in [../Engine/Source/Engine/Game.cpp](../Engine/Source/Engine/Game.cpp):
+
+1. Poll events and forward to current scene.
+2. Apply pending scene transition.
+3. Update current scene.
+4. Apply pending scene transition again (if requested during update).
+5. Draw current scene, optionally capture frame artifacts, then display.
+
+### Engine::Scene
+
+[../Engine/Include/Engine/Scene.h](../Engine/Include/Engine/Scene.h) defines a
+minimal scene interface with virtual hooks:
+
+- `handleEvent(const sf::Event&)`
+- `update(float dt)`
+- `draw(sf::RenderWindow&)`
+
+`GameScene` in this module derives from `Engine::Scene` and implements all
+three hooks.
+
+### Engine::DelayedAction
+
+[../Engine/Include/Engine/DelayedAction.h](../Engine/Include/Engine/DelayedAction.h)
+is a small one-shot timer utility:
+
+- `start(duration, callback)` schedules a callback
+- `update(dt, canAdvance)` progresses time and fires callback when elapsed
+- `cancel()` aborts pending action
+
+`GameModel` uses two delayed actions:
+
+- mismatch reveal delay before flipping unmatched cards down
+- win delay before automatically advancing to the next level
+
+### Frame Capture Support
+
+In headed mode, the Engine can save per-frame PNGs when
+`MEMORYGAME_CAPTURE_FRAMES_DIR` is set in the environment.
+
+Implementation is in
+[../Engine/Source/Engine/Game.cpp](../Engine/Source/Engine/Game.cpp) via
+`captureFrameIfRequested()`.
 
 ## Gameplay Rules
 
